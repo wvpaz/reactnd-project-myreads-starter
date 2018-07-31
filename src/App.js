@@ -6,7 +6,7 @@ import { Link, Route } from 'react-router-dom'
 import PropTypes from "prop-types"
 import './App.css'
 
-export default class BooksApp extends Component {
+export default class App extends Component {
   state = {
     books: [],
     shelfs: [],
@@ -17,7 +17,10 @@ export default class BooksApp extends Component {
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
       this.setState({ books });
-    })
+      throw "An error ocurred when get all books to organize and shows on home page.";
+    }).catch(function(e){
+      console.log(e);
+    });
   }
 
   /**
@@ -29,7 +32,7 @@ export default class BooksApp extends Component {
     let shelfs = [];
 
     books.forEach((book) => {
-      let index = shelfs.map((obj) => { return obj.key }).indexOf(book.shelf);
+      let index = shelfs.findIndex((obj) => obj.key === book.shelf);
 
       if (index >= 0) {
         shelfs[index].values.push(book);
@@ -51,14 +54,7 @@ export default class BooksApp extends Component {
     let authors = "";
 
     if (arrAuthors !== undefined && arrAuthors !== null && arrAuthors.length > 0) {
-      arrAuthors.forEach((author) => {
-        if (authors.length === 0) {
-          authors += author;
-        }
-        else {
-          authors += (", " + author);
-        }
-      });
+      authors = arrAuthors.join(", ");
     }
 
     return authors;
@@ -88,9 +84,12 @@ export default class BooksApp extends Component {
           if (aux.length > 0) {
             aux[0].shelf = element.shelf;
           }
+          throw "An error ocurred when search a book.";
         });
         return books;
       }
+    }).catch(function(e){
+      console.log(e);
     });
   };
 
@@ -119,6 +118,9 @@ export default class BooksApp extends Component {
         });
 
         this.setState({ books: this.deepCopy(bookShelfs) });
+        throw "Un error ocurred when update a book information.";
+      }).catch(function(e) {
+        console.log(e);
       });
     }
   };
@@ -172,13 +174,4 @@ export default class BooksApp extends Component {
       </div>
     )
   }
-}
-
-BooksApp.propTypes = {
-  key: PropTypes.string.isRequired,
-  bookShelfs: PropTypes.array,
-  onSearchBooks: PropTypes.func,
-  getBookAuthors: PropTypes.func,
-  getShelfTitle: PropTypes.func,
-  onUpdateBook: PropTypes.func
 }
